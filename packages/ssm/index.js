@@ -1,3 +1,5 @@
+const { SSM } = require('aws-sdk')
+
 let ssmInstance
 
 module.exports = opts => {
@@ -19,6 +21,8 @@ module.exports = opts => {
 
   const options = Object.assign({}, defaults, opts)
 
+  ssmInstance = getSSMInstance(options.awsSdkOptions)
+
   return {
     before: (handler, next) => {
       if (!shouldFetchFromParamStore(options)) {
@@ -30,8 +34,6 @@ module.exports = opts => {
         }
         return next()
       }
-
-      ssmInstance = ssmInstance || getSSMInstance(options.awsSdkOptions)
 
       const ssmPromises = Object.keys(options.paths).reduce(
         (aggregator, prefix) => {
@@ -157,7 +159,6 @@ const getSSMInstance = awsSdkOptions => {
 
   // AWS Lambda has aws-sdk included version 2.176.0
   // see https://docs.aws.amazon.com/lambda/latest/dg/current-supported-versions.html
-  const { SSM } = require('aws-sdk')
   return new SSM(awsSdkOptions)
 }
 
